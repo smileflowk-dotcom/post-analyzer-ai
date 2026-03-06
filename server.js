@@ -6,7 +6,7 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
-const OPENAI_KEY = "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"
+const OPENAI_KEY = "apiKey: process.env.OPENAI_API_KEY"
 
 
 
