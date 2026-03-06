@@ -14,8 +14,13 @@ app.use(express.json());
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const publicDir = path.join(__dirname, "public");
 
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(publicDir));
+
+app.get("/health", (req, res) => {
+  res.status(200).send("ok");
+});
 
 app.post("/analyze", async (req, res) => {
   try {
@@ -58,11 +63,12 @@ app.post("/analyze", async (req, res) => {
 });
 
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+  res.sendFile(path.join(publicDir, "index.html"));
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = Number(process.env.PORT) || 8080;
+const HOST = "0.0.0.0";
 
-app.listen(PORT, () => {
-  console.log("Server running on port", PORT);
+app.listen(PORT, HOST, () => {
+  console.log(`Server running on http://${HOST}:${PORT}`);
 });
