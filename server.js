@@ -15,24 +15,24 @@ app.use(express.json());
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// servir les fichiers du dossier public
 app.use(express.static(path.join(__dirname, "public")));
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
-
-// route analyse
 app.post("/analyze", async (req, res) => {
-
   try {
-
     const { post } = req.body;
 
+    if (!process.env.OPENAI_API_KEY) {
+      return res.status(500).json({
+        error: "OPENAI_API_KEY manquante dans Railway"
+      });
+    }
+
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY
+    });
+
     const completion = await openai.chat.completions.create({
-
       model: "gpt-4.1-mini",
-
       messages: [
         {
           role: "system",
@@ -44,32 +44,24 @@ app.post("/analyze", async (req, res) => {
           content: post
         }
       ]
-
     });
 
     res.json({
       result: completion.choices[0].message.content
     });
-
   } catch (error) {
-
-    console.error(error);
-
+    console.error("Erreur /analyze :", error);
     res.status(500).json({
       error: "Erreur analyse IA"
     });
-
   }
-
 });
 
-// fallback vers index.html
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "public/index.html"));
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-// IMPORTANT pour Railway
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
   console.log("Server running on port", PORT);
