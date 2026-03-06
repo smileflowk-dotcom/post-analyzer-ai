@@ -15,13 +15,14 @@ app.use(express.json());
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// servir le dossier public
+// servir les fichiers du dossier public
 app.use(express.static(path.join(__dirname, "public")));
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
 
+// route analyse
 app.post("/analyze", async (req, res) => {
 
   try {
@@ -29,17 +30,21 @@ app.post("/analyze", async (req, res) => {
     const { post } = req.body;
 
     const completion = await openai.chat.completions.create({
+
       model: "gpt-4.1-mini",
+
       messages: [
         {
           role: "system",
-          content: "Analyse ce post pour les réseaux sociaux. Donne un score sur 10 et propose une version améliorée."
+          content:
+            "Analyse ce post pour les réseaux sociaux. Donne un score sur 10, explique pourquoi et propose une version améliorée."
         },
         {
           role: "user",
           content: post
         }
       ]
+
     });
 
     res.json({
@@ -63,6 +68,7 @@ app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "public/index.html"));
 });
 
+// IMPORTANT pour Railway
 const PORT = process.env.PORT;
 
 app.listen(PORT, () => {
